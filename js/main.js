@@ -147,40 +147,6 @@ const skillObserver = new IntersectionObserver((entries) => {
 skillProgressBars.forEach(bar => skillObserver.observe(bar));
 
 /* ================================================
-   ANIMATED COUNTERS for stat numbers
-   ================================================ */
-function animateCounter(el, target, duration = 1500) {
-  const isDecimal = target.toString().includes('+') || target.toString().includes('%');
-  const numericTarget = parseFloat(target.toString().replace('+', '').replace('%', ''));
-  let start = 0;
-  const step = numericTarget / (duration / 16);
-  const suffix = target.toString().includes('+') ? '+' : '';
-
-  const tick = () => {
-    start = Math.min(start + step, numericTarget);
-    el.textContent = Math.floor(start) + suffix;
-    if (start < numericTarget) requestAnimationFrame(tick);
-    else el.textContent = target;
-  };
-  tick();
-}
-
-const statNumbers = document.querySelectorAll('.stat-number');
-
-const statObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const el = entry.target;
-      const val = el.textContent.trim();
-      animateCounter(el, val);
-      statObserver.unobserve(el);
-    }
-  });
-}, { threshold: 0.5 });
-
-statNumbers.forEach(el => statObserver.observe(el));
-
-/* ================================================
    CONTACT FORM — simulated send
    ================================================ */
 const contactForm = document.getElementById('contactForm');
@@ -293,58 +259,6 @@ projectCards.forEach(card => {
     card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
   });
 });
-
-/* ================================================
-   STRENGTH CARDS — staggered hover glow
-   ================================================ */
-const strengthCards = document.querySelectorAll('.strength-card');
-
-strengthCards.forEach((card, index) => {
-  card.style.transitionDelay = `${index * 0.05}s`;
-});
-
-/* ================================================
-   CURSOR GLOW (subtle ambient glow follows cursor)
-   ================================================ */
-let glowEl = document.createElement('div');
-glowEl.style.cssText = `
-  position: fixed;
-  pointer-events: none;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
-  transform: translate(-50%, -50%);
-  z-index: 0;
-  transition: opacity 0.3s ease;
-  will-change: transform;
-`;
-document.body.appendChild(glowEl);
-
-document.addEventListener('mousemove', (e) => {
-  glowEl.style.left = `${e.clientX}px`;
-  glowEl.style.top = `${e.clientY}px`;
-});
-
-/* ================================================
-   TYPING EFFECT for hero role text
-   ================================================ */
-const roleText = document.querySelector('.role-animated');
-if (roleText) {
-  const text = roleText.textContent;
-  roleText.textContent = '';
-
-  let i = 0;
-  function typeChar() {
-    if (i < text.length) {
-      roleText.textContent += text[i++];
-      setTimeout(typeChar, 60);
-    }
-  }
-
-  // Start typing after a brief delay
-  setTimeout(typeChar, 1000);
-}
 
 console.log('%c🚀 Ruqayya Ansar Portfolio', 'color:#6366f1;font-size:20px;font-weight:bold;');
 console.log('%cWeb Developer | Frontend | CMS | SEO', 'color:#06b6d4;font-size:14px;');
