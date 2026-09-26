@@ -106,6 +106,9 @@ const heroSection = document.querySelector('.hero');
 const avatarCard = document.querySelector('.avatar-card');
 
 if (heroSection && avatarCard) {
+  let heroFrame;
+  let heroTransform = 'translate(-50%, -50%) translateY(0) rotateX(0deg) rotateY(0deg)';
+
   heroSection.addEventListener('mousemove', (e) => {
     const rect = heroSection.getBoundingClientRect();
     const cx = rect.width / 2;
@@ -116,12 +119,23 @@ if (heroSection && avatarCard) {
     const rotX = dy * -8;
     const rotY = dx * 8;
 
-    avatarCard.style.transform =
-      `translate(-50%, -50%) translateY(0) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    heroTransform = `translate(-50%, -50%) translateY(0) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    if (!heroFrame) {
+      heroFrame = requestAnimationFrame(() => {
+        avatarCard.style.transform = heroTransform;
+        heroFrame = null;
+      });
+    }
   });
 
   heroSection.addEventListener('mouseleave', () => {
-    avatarCard.style.transform = 'translate(-50%, -50%) translateY(0) rotateX(0deg) rotateY(0deg)';
+    heroTransform = 'translate(-50%, -50%) translateY(0) rotateX(0deg) rotateY(0deg)';
+    if (!heroFrame) {
+      heroFrame = requestAnimationFrame(() => {
+        avatarCard.style.transform = heroTransform;
+        heroFrame = null;
+      });
+    }
   });
 }
 
@@ -242,6 +256,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 const projectCards = document.querySelectorAll('.project-card');
 
 projectCards.forEach(card => {
+  let frame;
+  let cardTransform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
+
   card.addEventListener('mousemove', (e) => {
     const rect = card.getBoundingClientRect();
     const cx = rect.width / 2;
@@ -252,13 +269,83 @@ projectCards.forEach(card => {
     const rotX = dy * -5;
     const rotY = dx * 5;
 
-    card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-8px) scale(1.01)`;
+    cardTransform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-8px) scale(1.01)`;
+    if (!frame) {
+      frame = requestAnimationFrame(() => {
+        card.style.transform = cardTransform;
+        frame = null;
+      });
+    }
   });
 
   card.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
+    cardTransform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
+    if (!frame) {
+      frame = requestAnimationFrame(() => {
+        card.style.transform = cardTransform;
+        frame = null;
+      });
+    }
   });
 });
 
+/* ================================================
+   CUSTOM CURSOR — fine pointers only
+   ================================================ */
+function initCustomCursor() {
+  const cursor = document.getElementById('customCursor');
+  const cursorDot = cursor?.querySelector('.custom-cursor-dot');
+  const cursorRing = cursor?.querySelector('.custom-cursor-ring');
+  const finePointer = window.matchMedia('(pointer: fine)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (!cursor || !cursorDot || !cursorRing || !finePointer.matches || reducedMotion.matches) return;
+
+  document.body.classList.add('custom-cursor-enabled');
+
+  let targetX = -100;
+  let targetY = -100;
+  let ringX = -100;
+  let ringY = -100;
+  let frame;
+
+  const renderCursor = () => {
+    ringX += (targetX - ringX) * 0.18;
+    ringY += (targetY - ringY) * 0.18;
+    cursorDot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0) translate(-50%, -50%)`;
+    cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+
+    if (Math.abs(targetX - ringX) > 0.1 || Math.abs(targetY - ringY) > 0.1) {
+      frame = requestAnimationFrame(renderCursor);
+    } else {
+      frame = null;
+    }
+  };
+
+  window.addEventListener('mousemove', (event) => {
+    targetX = event.clientX;
+    targetY = event.clientY;
+    cursor.classList.add('is-visible');
+    if (!frame) frame = requestAnimationFrame(renderCursor);
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', () => cursor.classList.remove('is-visible'));
+  document.addEventListener('mouseenter', () => cursor.classList.add('is-visible'));
+
+  document.querySelectorAll('a, button:not(:disabled), input, textarea, select, [role="button"]').forEach(element => {
+    element.addEventListener('mouseenter', () => cursor.classList.add('is-hovering'));
+    element.addEventListener('mouseleave', () => cursor.classList.remove('is-hovering'));
+    element.addEventListener('focus', () => cursor.classList.add('is-hovering'));
+    element.addEventListener('blur', () => cursor.classList.remove('is-hovering'));
+  });
+
+  window.addEventListener('mousedown', () => {
+    cursor.classList.add('is-clicking');
+    window.setTimeout(() => cursor.classList.remove('is-clicking'), 140);
+  }, { passive: true });
+}
+
+initCustomCursor();
+
 console.log('%c🚀 Ruqayya Ansar Portfolio', 'color:#6366f1;font-size:20px;font-weight:bold;');
-console.log('%cWeb Developer | Frontend | CMS | SEO', 'color:#06b6d4;font-size:14px;');
+console.log('%cAssociate Web Developer | Frontend | CMS | SEO', 'color:#06b6d4;font-size:14px;');
